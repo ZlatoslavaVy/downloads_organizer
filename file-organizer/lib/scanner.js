@@ -20,11 +20,25 @@ export class Scanner extends EventEmitter {
 
             let stats;
             try {
-                stats = await fs.stats(fullPath);
+                stats = await fs.stat(fullPath);
             } catch (err) {
                 this.emit('file-error', {fullPath, error: err.message});
                 continue;
             }
+
+            if (!stats.isFile()) continue;
+
+            const {size, mtime} = stats;
+            const extension = path.extname(relativePath).toLowerCase() || '(no extension)';
+
+            const ageInDays = (Date.now() - mtime.getTime()) / (1000 * 60 * 60 * 24);
+            
+            if (ageInDays <= 7) last7Days++;
+            if(ageInDays <=30) last30Days++;
+            if(ageInDays > 90) olderThan90Days++;
+
+            totalSize += size;
+
         }
     }
 }

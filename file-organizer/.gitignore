@@ -1,0 +1,8 @@
+node_modules/
+.Thumbs.db
+*.log
+
+.env
+
+.idea
+.vscode

@@ -5,7 +5,7 @@ import path from 'path';
 export class Scanner extends EventEmitter {
     async scan(directory) {
         this.emit('scan-start', {directory});
-        const reletivePaths = await fs.readdir(directory, {recursive: true});
+        const relativePaths = await fs.readdir(directory, {recursive: true});
 
         const filesData = [];
         const byType = new Map();
@@ -38,7 +38,46 @@ export class Scanner extends EventEmitter {
             if(ageInDays > 90) olderThan90Days++;
 
             totalSize += size;
+            const typeEntry = byType.get(extension) ?? { count: 0, totalSize: 0};
+            typeEntry.count += 1;
+            typeEntry.totalSize += size;
+            byType.set(extension, typeEntry);
 
+            const fileItem = { 
+                name: path.basename(relativePath), 
+                path: fullPath, 
+                relativePath, 
+                size, 
+                mtime, 
+                ageInDays, 
+                extension
+            };
+           filesData.push(fileItem);
+           this.emit('file-found', fileItem);
+        }
+           let oldestFile = null;
+           if (filesData.length > 0) {
+            oldestFile = filesData.reduce((oldest, current) =>
+            current.mtime < oldest.mtime ? current: oldest
+            );
+           }
+           const largestFiles = [...filesData]
+           .sort((a, b) => b.size - a.size)
+           .slice(0, 3);
+
+           const summary = {
+            totalFiles: filesData.length,
+            totalSize,
+            byType,
+            ageStats: {
+                last7Days,
+                last30Days,
+                olderThan90Days
+            },
+            largestFiles,
+            oldestFile
+           };
+           this.emit('scan-complete', summary);
+           return summary;
         }
     }
-}

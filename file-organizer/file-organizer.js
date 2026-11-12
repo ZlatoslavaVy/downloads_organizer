@@ -1,6 +1,7 @@
+import fs from 'fs/promises';
 import path from 'path';
 import { Scanner } from './lib/scanner.js';
-import { DuplicateFinder } from './lib/dublicates.js'; // Зверни увагу на назву файлу, як у твоєму проєкті
+import { DuplicateFinder } from './lib/duplicates.js'; 
 import { Organizer } from './lib/organizer.js';
 import { Cleanup } from './lib/cleanup.js';
 
@@ -145,7 +146,12 @@ async function runCleanup(directory, args) {
     console.error('❌ Error: Missing --older-than <days> argument.');
     process.exit(1);
   }
-  const olderThan = parseInt(args[daysIndex + 1], 10);
+
+  const olderThan = Number(args[daysIndex + 1]);
+  if (!Number.isFinite(olderThan) || olderThan <= 0) {
+    console.error(`❌ Error: --older-than must be a positive number, got "${args[daysIndex + 1]}"`);
+    process.exit(1);
+  }
   const confirm = args.includes('--confirm');
   
   const cleanup = new Cleanup();
@@ -182,6 +188,15 @@ async function runCleanup(directory, args) {
   }
 }
 
+async function ensureDirectory(directory) {
+  const stats = await fs.stat(directory); // кине ENOENT, якщо папки немає
+  if (!stats.isDirectory()) {
+    const error = new Error('Not a directory');
+    error.code = 'ENOTDIR';
+    throw error;
+  }
+}
+
 // ---------- Точка входу ----------
 async function main() {
   const [command, directoryArg, ...restArgs] = process.argv.slice(2);
@@ -194,6 +209,8 @@ async function main() {
   const directory = path.resolve(directoryArg);
 
   try {
+    await ensureDirectory(directory); 
+
     switch (command) {
       case 'scan':
         await runScan(directory);

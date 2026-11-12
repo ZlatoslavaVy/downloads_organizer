@@ -84,7 +84,7 @@
 ---
 
 ### 3. `organize` — Сортування за категоріями
-Копіює файли з вихідної директорії у цільову, розпускуючи їх по папках: `Documents`, `Images`, `Archives`, `Code`, `Videos` та `Other`.
+Копіює файли з вихідної директорії у цільову, розкладаючи їх по папках: `Documents`, `Images`, `Archives`, `Code`, `Videos` та `Other`.
 
 * **Аргументи**:
   * `--output <target>` — (обов'язковий) шлях до цільової директорії.
@@ -106,7 +106,7 @@
 Знаходить файли, які не змінювалися понад `N` днів.
 
 * **Аргументи та прапорці**:
-  * `--older-than <days>` — (обов'язковий) поріг віку файлу в днях.
+  * `--older-than <days>` — (обов'язковий) поріг віку файлу в днях, додатне число (більше 0).
   * `--confirm` — (опціональний) підтвердження видалення. Без цього прапорця команда працює у режимі **Dry Run** (лише показує список без видалення).
 * **Запуск**:
   ```bash
@@ -126,13 +126,14 @@ file-organizer/
 ├── package.json          # Конфігурація проєкту ("type": "module", npm scripts)
 ├── .gitignore            # Виключення для Git (node_modules, логи)
 ├── README.md             # Документація проєкту
-├── file-organizer.js     # Точка входу: розбір process.argv, CLI-вивід, прогрес-бар
+├── file-organizer.js     # Точка входу: розбір process.argv, CLI-вивід, прогрес-бар;
+│                         # містить допоміжні функції formatSize() і drawProgressBar()
 └── lib/
     ├── scanner.js        # Клас Scanner (обхід директорій, статистика)
     ├── duplicates.js     # Клас DuplicateFinder (SHA-256 хешування через streams)
     ├── organizer.js      # Клас Organizer (сортування, copyFile vs pipeline)
     ├── cleanup.js        # Клас Cleanup (пошук та видалення за віком)
-    └── utils.js          # Допоміжні функції (formatSize, drawProgressBar)
+    └── utils.js          # Допоміжна функція collectFiles() (рекурсивний збір файлів)
 ```
 
 ---

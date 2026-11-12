@@ -24,8 +24,8 @@ export class DuplicateFinder extends EventEmitter {
       this.emit('file-error', { path: fullPath, error: error.message, code: error.code });
     });
 
-    // Порожні файли пропускаємо: вони однакові, але місця не займають
-    const files = allFiles.filter((file) => file.size > 0);
+    // Порожні файли теж враховуємо: усі вони мають однаковий хеш
+    const files = allFiles;
 
     const byHash = new Map(); // hash -> масив файлів
     let processed = 0;
